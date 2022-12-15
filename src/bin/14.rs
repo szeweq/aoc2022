@@ -1,3 +1,8 @@
+/*
+ * Day 14: Regolith Reservoir
+ * See [https://adventofcode.com/2022/day/14]
+ */
+
 use std::collections::{HashSet};
 
 fn parse_path(input: &str) -> Vec<Vec<(u32, u32)>> {

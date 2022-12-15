@@ -1,3 +1,8 @@
+/*
+ * Day 15: Beacon Exclusion Zone
+ * See [https://adventofcode.com/2022/day/15]
+ */
+
 use std::collections::{HashMap};
 
 fn parse_sensors(input: &str) -> Vec<((i32, i32), (i32, i32))> {

@@ -1,3 +1,8 @@
+/*
+ * Day 12: Hill Climbing Algorithm
+ * See [https://adventofcode.com/2022/day/12]
+ */
+
 use std::{collections::VecDeque};
 
 type Pt = (usize, usize);

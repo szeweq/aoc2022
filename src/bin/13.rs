@@ -1,3 +1,8 @@
+/*
+ * Day 13: Distress Signal
+ * See [https://adventofcode.com/2022/day/13]
+ */
+
 use std::cmp::Ordering;
 
 use nom::{
