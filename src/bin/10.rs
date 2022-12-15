@@ -1,3 +1,7 @@
+/*
+ * Day 10: Cathode-Ray Tube
+ * See [https://adventofcode.com/2022/day/10]
+ */
 
 pub fn part_1(input: &str) -> Option<i32> {
     let mut cycles = 1;

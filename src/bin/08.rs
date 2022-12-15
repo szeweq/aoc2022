@@ -1,3 +1,8 @@
+/*
+ * Day 8: Treetop Tree House
+ * See [https://adventofcode.com/2022/day/8]
+ */
+
 fn input_grid(input: &str) -> Vec<&[u8]> {
     input.lines().map(str::as_bytes).collect::<Vec<&[u8]>>()
 }

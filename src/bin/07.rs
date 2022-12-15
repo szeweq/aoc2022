@@ -1,3 +1,7 @@
+/*
+ * Day 7: No Space Left On Device
+ * See [https://adventofcode.com/2022/day/7]
+ */
 
 #[derive(PartialEq)]
 struct FTree {

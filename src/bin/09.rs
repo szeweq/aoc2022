@@ -1,3 +1,8 @@
+/*
+ * Day 9: Rope Bridge
+ * See [https://adventofcode.com/2022/day/9]
+ */
+
 use std::collections::HashSet;
 
 #[derive(Clone, PartialEq, Eq, Hash)]

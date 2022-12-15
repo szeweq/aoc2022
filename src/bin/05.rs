@@ -1,3 +1,8 @@
+/*
+ * Day 5: Supply Stacks
+ * See [https://adventofcode.com/2022/day/5]
+ */
+
 use std::str::SplitAsciiWhitespace;
 
 fn make_vecs(slen: usize) -> (usize, Box<[Vec<u8>]>) {

@@ -1,3 +1,8 @@
+/*
+ * Day 3: Rucksack Reorganization
+ * See [https://adventofcode.com/2022/day/3]
+ */
+
 use itertools::Itertools;
 
 fn pts(ch: u8) -> u32 {

@@ -1,3 +1,7 @@
+/*
+ * Day 1: Calorie Counting
+ * See [https://adventofcode.com/2022/day/1]
+ */
 
 pub fn part_1(input: &str) -> Option<u32> {
     let mut maxcal: u32 = 0;

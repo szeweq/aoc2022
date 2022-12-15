@@ -1,3 +1,8 @@
+/*
+ * Day 4: Camp Cleanup
+ * See [https://adventofcode.com/2022/day/4]
+ */
+
 use aoc2022::util;
 
 #[derive(Debug, Clone, Copy)]

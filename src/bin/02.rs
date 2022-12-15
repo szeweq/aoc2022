@@ -1,4 +1,9 @@
-#[derive(PartialEq, Clone, Copy)]
+/*
+ * Day 2: Rock Paper Scissors
+ * See [https://adventofcode.com/2022/day/2]
+ */
+
+ #[derive(PartialEq, Clone, Copy)]
 enum RPS {
     Rock, Paper, Scissors
 }

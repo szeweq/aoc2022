@@ -1,3 +1,8 @@
+/*
+ * Day 6: Tuning Trouble
+ * See [https://adventofcode.com/2022/day/6]
+ */
+
 use std::collections::{HashMap};
 
 pub fn part_1(input: &str) -> Option<u32> {
