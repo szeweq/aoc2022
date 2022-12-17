@@ -7,30 +7,30 @@ use std::collections::HashMap;
 
 const B_W: [u8; 5] = [4, 3, 3, 1, 2];
 
-const BCH: [for<'r> fn(&'r Vec<u8>, (u8, usize)) -> bool; 5] = [b0_check, b1_check, b2_check, b3_check, b4_check];
+const BCH: [for<'r> fn(&'r Vec<u8>, u8, usize) -> bool; 5] = [b0_check, b1_check, b2_check, b3_check, b4_check];
 const BFL: [for<'r> fn(&'r mut Vec<u8>, (u8, usize)); 5] = [b0_fill, b1_fill, b2_fill, b3_fill, b4_fill];
 
-fn b0_check(v: &Vec<u8>, p: (u8, usize)) -> bool {
-    let c = 15u8 << p.0;
-    v[p.1] & c == 0
+fn b0_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+    let c = 15u8 << x;
+    v[y] & c == 0
 }
-fn b1_check(v: &Vec<u8>, p: (u8, usize)) -> bool {
-    let c1 = 2 << p.0;
-    let c2 = 7 << p.0;
-    v[p.1] & c1 == 0 && v[p.1 + 1] & c2 == 0 && v[p.1 + 2] & c1 == 0
+fn b1_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+    let c1 = 2 << x;
+    let c2 = 7 << x;
+    v[y] & c1 == 0 && v[y + 1] & c2 == 0 && v[y + 2] & c1 == 0
 }
-fn b2_check(v: &Vec<u8>, p: (u8, usize)) -> bool {
-    let c1 = 7 << p.0;
-    let c2 = 1 << p.0;
-    v[p.1] & c1 == 0 && v[p.1 + 1] & c2 == 0 && v[p.1 + 2] & c2 == 0
+fn b2_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+    let c1 = 7 << x;
+    let c2 = 1 << x;
+    v[y] & c1 == 0 && v[y + 1] & c2 == 0 && v[y + 2] & c2 == 0
 }
-fn b3_check(v: &Vec<u8>, p: (u8, usize)) -> bool {
-    let c = 1 << p.0;
-    v[p.1] & c == 0 && v[p.1 + 1] & c == 0 && v[p.1 + 2] & c == 0 && v[p.1 + 3] & c == 0
+fn b3_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+    let c = 1 << x;
+    v[y] & c == 0 && v[y + 1] & c == 0 && v[y + 2] & c == 0 && v[y + 3] & c == 0
 }
-fn b4_check(v: &Vec<u8>, p: (u8, usize)) -> bool {
-    let c = 3 << p.0;
-    v[p.1] & c == 0 && v[p.1 + 1] & c == 0
+fn b4_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+    let c = 3 << x;
+    v[y] & c == 0 && v[y + 1] & c == 0
 }
 
 fn b0_fill(v: &mut Vec<u8>, p: (u8, usize)) {
@@ -112,16 +112,14 @@ fn solve(bi: &[u8], max_rocks: usize) -> usize {
         match &b {
             b'>' => {
                 if pos.0 > 0 {
-                    let rpos = (pos.0-1, pos.1);
-                    if BCH[block](&v, rpos) {
+                    if BCH[block](&v, pos.0-1, pos.1) {
                         pos.0 -= 1;
                     }
                 }
             }
             b'<' => {
                 if pos.0 + B_W[block] < 7 {
-                    let rpos = (pos.0+1, pos.1);
-                    if BCH[block](&v, rpos) {
+                    if BCH[block](&v, pos.0+1, pos.1) {
                         pos.0 += 1;
                     }
                 }
@@ -129,7 +127,7 @@ fn solve(bi: &[u8], max_rocks: usize) -> usize {
             _ => {}
         }
         let (x, y) = pos;
-        if pos.1 > 0 && BCH[block](&v, (x, y-1)) {
+        if pos.1 > 0 && BCH[block](&v, x, y-1) {
             pos.1 -= 1;
         } else {
             BFL[block](&mut v, pos);
