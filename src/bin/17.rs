@@ -109,22 +109,14 @@ fn solve(bi: &[u8], max_rocks: usize) -> usize {
     while rocks < max_rocks {
         let block = rocks % 5;
         let b = bi[i];
-        match &b {
-            b'>' => {
-                if pos.0 > 0 {
-                    if BCH[block](&v, pos.0-1, pos.1) {
-                        pos.0 -= 1;
-                    }
-                }
+        if b == b'>' && pos.0 > 0 {
+            if BCH[block](&v, pos.0-1, pos.1) {
+                pos.0 -= 1;
             }
-            b'<' => {
-                if pos.0 + B_W[block] < 7 {
-                    if BCH[block](&v, pos.0+1, pos.1) {
-                        pos.0 += 1;
-                    }
-                }
+        } else if b == b'<' && pos.0 + B_W[block] < 7 {
+            if BCH[block](&v, pos.0+1, pos.1) {
+                pos.0 += 1;
             }
-            _ => {}
         }
         let (x, y) = pos;
         if pos.1 > 0 && BCH[block](&v, x, y-1) {
