@@ -40,7 +40,7 @@ impl MineState for (u32, u32) {
     }
 }
 
-fn sim_blueprint(time: u32, costs: [u32; 6]) -> usize {
+fn sim_blueprint(time: u32, costs: [u32; 6]) -> u32 {
     let [c_ore, c_clay, c_obs_o, c_obs_c, c_geo_o, c_geo_b] = costs;
     let state: [(u32, u32); 4] = [(1, 0), (0, 0), (0, 0), (0, 0)];
     let ototal = c_ore.max(c_clay).max(c_obs_o).max(c_geo_o);
@@ -115,18 +115,18 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> usize {
             vq.push_back(([ns_ore, s_clay, ns_obs, ns_geo], nt));
         }
     }
-    max_geode as usize
+    max_geode
 }
 
-pub fn part_1(input: &str) -> Option<usize> {
+pub fn part_1(input: &str) -> Option<u32> {
     Some(input.lines().map(parse_line)
         .enumerate()
-        .map(|(i, c)| (i+1)*sim_blueprint(24, c))
+        .map(|(i, c)| (i as u32 + 1) * sim_blueprint(24, c))
         .sum()
     )
 }
 
-pub fn part_2(input: &str) -> Option<usize> {
+pub fn part_2(input: &str) -> Option<u32> {
     Some(input.lines().take(3).map(parse_line)
         .map(|c| sim_blueprint(32, c))
         .product()
