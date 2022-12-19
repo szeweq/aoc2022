@@ -47,6 +47,7 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> usize {
     let mut vq = VecDeque::from([(state, time)]);
     let mut hs = HashSet::new();
     let mut max_geode = 0;
+    let mut lt = time;
     while let Some((cs, t)) = vq.pop_front() {
         let [
             mut s_ore,
@@ -75,7 +76,10 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> usize {
         let mine_obs = t * c_geo_b - s_obs.0 * nt;
         set_min!(s_obs.1, mine_obs);
 
-        if !hs.insert(([s_ore, s_clay, s_obs, s_geo], t)) {
+        if lt > t {
+            hs.clear();
+            lt = t;
+        } else if lt == t && !hs.insert(([s_ore, s_clay, s_obs, s_geo], t)) {
             continue;
         }
 
