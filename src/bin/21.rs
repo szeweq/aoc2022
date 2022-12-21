@@ -7,7 +7,7 @@ use std::{collections::{HashMap, HashSet}};
 
 type Mn = u32;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum OpType {
     Num(i64), Op(Mn, Op, Mn)
 }
@@ -18,7 +18,7 @@ macro_rules! is_op {
     };
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum Op {
     Add, Sub, Mul, Div
 }
@@ -69,17 +69,16 @@ fn parse_line(l: &str) -> (Mn, OpType) {
 fn calculate(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) -> Option<i64> {
     use OpType::*;
     queue.push(start);
-    while let Some(cm) = queue.pop() {
-        let cv = &map[&cm];
-        if let Op(a, op, b) = cv {
-            let av = &map[a];
-            let bv = &map[b];
+    while let Some(cm) = queue.last() {
+        if let Op(a, op, b) = &map[cm] {
+            let av = map[a];
+            let bv = map[b];
             if let (Num(na), Num(nb)) = (av, bv) {
-                let nn = op.do_op(*na, *nb);
-                map.insert(cm, Num(nn));
+                let nn = op.do_op(na, nb);
+                map.insert(*cm, Num(nn));
+                queue.pop();
                 continue;
             }
-            queue.push(cm);
             if is_op!(av) {
                 queue.push(*a);
             }
@@ -88,7 +87,7 @@ fn calculate(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) -> O
             }
         }
     }
-    if let OpType::Num(x) = map.get(&start).unwrap() { Some(*x) } else { None }
+    if let OpType::Num(x) = map[&start] { Some(x) } else { None }
 }
 
 pub fn part_1(input: &str) -> Option<i64> {
@@ -103,10 +102,10 @@ fn optimize(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) {
     let mut hs = HashSet::new();
     queue.push(start);
     while let Some(cm) = queue.pop() {
-        let cv = map.get(&cm).unwrap().clone();
+        let cv = map[&cm];
         if let Op(a, op, b) = cv {
-            let av = map.get(&a).unwrap().clone();
-            let bv = map.get(&b).unwrap().clone();
+            let av = map[&a];
+            let bv = map[&b];
             if a != M_HUMN && b != M_HUMN {
                 if let (Num(na), Num(nb)) = (&av, &bv) {
                     map.remove(&a);
@@ -136,7 +135,7 @@ pub fn part_2(input: &str) -> Option<i64> {
 
     let mut m = input.lines().map(parse_line).collect::<HashMap<_, _>>();
     let mut q: Vec<Mn> = Vec::new();
-    let Op(ma, _, mb) = m.get(&M_ROOT).unwrap().clone() else { return None; };
+    let Op(ma, _, mb) = m[&M_ROOT] else { return None; };
     optimize(&mut m, &mut q, M_ROOT);
     let (calc, comp) = match (&m[&ma], &m[&mb]) {
         (Num(_), Op(_, _, _)) => (ma, mb),
