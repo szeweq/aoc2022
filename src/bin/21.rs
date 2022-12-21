@@ -5,7 +5,7 @@
 
 use std::{collections::{HashMap, HashSet}};
 
-type Mn = [u8; 4];
+type Mn = u32;
 
 #[derive(Debug, Clone)]
 enum OpType {
@@ -36,17 +36,20 @@ impl Op {
 }
 
 macro_rules! mn {
+    [$f:expr] => {
+        u32::from_ne_bytes([$f[0], $f[1], $f[2], $f[3]])
+    };
     [$f:expr;$s:expr] => {
-        [$f[$s], $f[$s+1], $f[$s+2], $f[$s+3]]
+        u32::from_ne_bytes([$f[$s], $f[$s+1], $f[$s+2], $f[$s+3]])
     };
 }
 
-const M_ROOT: Mn = *b"root";
-const M_HUMN: Mn = *b"humn";
+const M_ROOT: Mn = mn![b"root"];
+const M_HUMN: Mn = mn![b"humn"];
 
 fn parse_line(l: &str) -> (Mn, OpType) {
     let bl = l.as_bytes();
-    let r: Mn = mn![bl; 0];
+    let r: Mn = mn![bl];
     let id = bl[6].is_ascii_digit();
     let op = if id { OpType::Num(l[6..].parse().unwrap()) } else {
         let a = mn![bl; 6];
