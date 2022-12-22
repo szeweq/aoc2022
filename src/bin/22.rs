@@ -49,8 +49,12 @@ fn pt_fix(pt: Pt, from: Dir, to: Dir) -> Pt {
     }
 }
 
-fn parse_map(input: &str) -> HashMap<Pt, bool> {
-    input.lines()
+fn parse(mut input: &str) -> (HashMap<Pt, bool>, Vec<(u32, usize)>) {
+    if input.ends_with('\n') {
+        input = &input[..input.len()-1];
+    }
+    let ix = input.rfind('\n').unwrap();
+    let hm = input[..ix].lines()
         .enumerate()
         .flat_map(|(i, l)| {
             let ni = i;
@@ -59,23 +63,23 @@ fn parse_map(input: &str) -> HashMap<Pt, bool> {
                 .filter_map(move |(j, b)| {
                     if b == b' ' { None } else { Some(((ni as isize, j as isize), b == b'#')) }
                 })
-        }).collect::<HashMap<_,_>>()
-}
-
-fn parse_instr(input: &str) -> Vec<(u32, usize)> {
-    let bi = input.as_bytes();
+        }).collect::<HashMap<_,_>>();
+    
+    let instr = &input[ix+1..];
     let mut n = 0;
     let mut movs = vec![];
-    for i in 1..input.len() {
-        if bi[i] == b'L' || bi[i] == b'R' {
-            let num: u32 = input[n..i].parse().unwrap();
-            movs.push((num, if bi[i] == b'L' { 3 } else { 1 }));
+    let instr_b = instr.as_bytes();
+    for i in 1..instr.len() {
+        let b = instr_b[i];
+        if b == b'L' || b == b'R' {
+            let num: u32 = instr[n..i].parse().unwrap();
+            movs.push((num, if b == b'L' { 3 } else { 1 }));
             n = i + 1;
         }
     }
-    let lnum = input[n..].parse().unwrap();
+    let lnum = instr[n..].parse().unwrap();
     movs.push((lnum, 0));
-    movs
+    (hm, movs)
 }
 
 const RP: [Pt; 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
@@ -99,9 +103,7 @@ impl From<usize> for Dir {
 }
 
 pub fn part_1(input: &str) -> Option<isize> {
-    let (i1, i2) = input.split_once("\r\n\r\n").unwrap();
-    let hm = parse_map(i1);
-    let movs = parse_instr(i2);
+    let (hm, movs) = parse(input);
     let mut pos = hm.keys().min().unwrap().clone();
     let mut cf = 0;
     let mut face = RP[cf];
@@ -139,7 +141,7 @@ pub fn part_1(input: &str) -> Option<isize> {
         }
         if r != 0 {
             cf = (cf + r) % 4;
-                face = RP[cf];
+            face = RP[cf];
         }
     }
     Some((pos.0+1)*1000 + (pos.1+1)*4 + cf as isize)
@@ -188,9 +190,7 @@ fn compute_folds(_: &HashMap<Pt, usize>) -> HashMap<(usize, Dir), (usize, Dir)> 
 }
 
 pub fn part_2(input: &str) -> Option<isize> {
-    let (i1, i2) = input.split_once("\r\n\r\n").unwrap();
-    let hm = parse_map(i1);
-    let movs = parse_instr(i2);
+    let (hm, movs) = parse(input);
     let (si_to_sp, sp_to_si) = compute_sectors(&hm);
     let folds = compute_folds(&sp_to_si);
     
