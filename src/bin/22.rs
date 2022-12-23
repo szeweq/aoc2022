@@ -1,3 +1,7 @@
+/*
+ * Day 22: Monkey Map
+ * See [https://adventofcode.com/2022/day/22]
+ */
 use std::{collections::{HashMap, BTreeSet}};
 
 const SEC_SIZE: isize = if cfg!(test) { 4 } else { 50 };
