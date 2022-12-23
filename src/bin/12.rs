@@ -61,7 +61,7 @@ fn bfs(grid: &[Vec<u8>], start: Pt, goal: Pt) -> Option<usize> {
 }
 
 fn range_xy(grid: &[Vec<u8>]) -> GridRange {
-    GridRange { u: 0, v: 0, umax: grid.len()-1, vmax: grid[0].len()-1 }
+    GridRange { u: 0, v: 0, umax: grid.len(), vmax: grid[0].len() }
 }
 
 fn parse_grid(input: &str) -> Vec<Vec<u8>> {
