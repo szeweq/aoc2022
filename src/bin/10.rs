@@ -3,6 +3,27 @@
  * See [https://adventofcode.com/2022/day/10]
  */
 
+use std::fmt::{Display, Write};
+
+#[derive(Debug, PartialEq)]
+pub struct MatrixDisplay {
+    data: [bool; 240]
+}
+
+impl Display for MatrixDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in 0..6 {
+            let line = &self.data[i*40..(i+1)*40];
+            for j in 0..40 {
+                f.write_char(if line[j] { '█' } else { '░' })?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
+
+
 pub fn part_1(input: &str) -> Option<i32> {
     let mut cycles = 1;
     let mut x = 1;
@@ -27,17 +48,17 @@ pub fn part_1(input: &str) -> Option<i32> {
     Some(sum)
 }
 
-pub fn part_2(input: &str) -> Option<String> {
+pub fn part_2(input: &str) -> Option<MatrixDisplay> {
     let mut cycles = 0;
     let mut x = 1i32;
-    let vv = &mut ['░'; 40*6];
+    let mut md = MatrixDisplay { data: [false; 240] };
 
     macro_rules! cdraw {
         () => {
             let ch = cycles % 40;
             let z = (ch as i32) - x;
             if (-1..2i32).contains(&z) {
-                vv[cycles] = '█';
+                md.data[cycles] = true;
             }
             cycles += 1;
         };
@@ -52,10 +73,7 @@ pub fn part_2(input: &str) -> Option<String> {
                 x += v;
         }
     }
-    let ss = (0..6).into_iter()
-        .map(|n| String::from_iter(&vv[n*40..(n+1)*40]))
-        .collect::<Vec<String>>().join("\n");
-    Some(ss)
+    Some(md)
 }
 
 aoc2022::solve!(part_1, part_2);
@@ -68,13 +86,18 @@ mod tests {
     #[test]
     fn test_part_1() { assert_ex!(part_1, 13140); }
 
-    const P2_RESULT: &str = r#"##..##..##..##..##..##..##..##..##..##..
-###...###...###...###...###...###...###.
-####....####....####....####....####....
-#####.....#####.....#####.....#####.....
-######......######......######......####
-#######.......#######.......#######....."#;
+    const T: bool = true;
+    const F: bool = false;
+
+    const P2_MD: MatrixDisplay = MatrixDisplay { data: [
+        T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F, T, T, F, F,
+        T, T, T, F, F, F, T, T, T, F, F, F, T, T, T, F, F, F, T, T, T, F, F, F, T, T, T, F, F, F, T, T, T, F, F, F, T, T, T, F,
+        T, T, T, T, F, F, F, F, T, T, T, T, F, F, F, F, T, T, T, T, F, F, F, F, T, T, T, T, F, F, F, F, T, T, T, T, F, F, F, F,
+        T, T, T, T, T, F, F, F, F, F, T, T, T, T, T, F, F, F, F, F, T, T, T, T, T, F, F, F, F, F, T, T, T, T, T, F, F, F, F, F,
+        T, T, T, T, T, T, F, F, F, F, F, F, T, T, T, T, T, T, F, F, F, F, F, F, T, T, T, T, T, T, F, F, F, F, F, F, T, T, T, T,
+        T, T, T, T, T, T, T, F, F, F, F, F, F, F, T, T, T, T, T, T, T, F, F, F, F, F, F, F, T, T, T, T, T, T, T, F, F, F, F, F
+    ] };
 
     #[test]
-    fn test_part_2() { assert_ex!(part_2, P2_RESULT); }
+    fn test_part_2() { assert_ex!(part_2, P2_MD); }
 }
