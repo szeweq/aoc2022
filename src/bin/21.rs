@@ -9,12 +9,12 @@ type Mn = u32;
 
 #[derive(Debug, Clone, Copy)]
 enum OpType {
-    Num(i64), Op(Mn, Op, Mn)
+    N(i64), O(Mn, Op, Mn)
 }
 
 macro_rules! is_op {
     ($v:expr) => {
-        if let OpType::Op(_, _, _) = $v { true } else { false }
+        if let OpType::O(_, _, _) = $v { true } else { false }
     };
 }
 
@@ -51,7 +51,7 @@ fn parse_line(l: &str) -> (Mn, OpType) {
     let bl = l.as_bytes();
     let r: Mn = mn![bl];
     let id = bl[6].is_ascii_digit();
-    let op = if id { OpType::Num(l[6..].parse().unwrap()) } else {
+    let op = if id { OpType::N(l[6..].parse().unwrap()) } else {
         let a = mn![bl; 6];
         let b = mn![bl; 13];
         let o = match l.as_bytes()[11] {
@@ -61,7 +61,7 @@ fn parse_line(l: &str) -> (Mn, OpType) {
             b'/' => Op::Div,
             _ => { panic!("Not allowed character") }
         };
-        OpType::Op(a, o, b)
+        OpType::O(a, o, b)
     };
     (r, op)
 }
@@ -70,12 +70,12 @@ fn calculate(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) -> O
     use OpType::*;
     queue.push(start);
     while let Some(cm) = queue.last() {
-        if let Op(a, op, b) = &map[cm] {
+        if let O(a, op, b) = &map[cm] {
             let av = map[a];
             let bv = map[b];
-            if let (Num(na), Num(nb)) = (av, bv) {
+            if let (N(na), N(nb)) = (av, bv) {
                 let nn = op.do_op(na, nb);
-                map.insert(*cm, Num(nn));
+                map.insert(*cm, N(nn));
                 queue.pop();
                 continue;
             }
@@ -87,7 +87,7 @@ fn calculate(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) -> O
             }
         }
     }
-    if let OpType::Num(x) = map[&start] { Some(x) } else { None }
+    if let OpType::N(x) = map[&start] { Some(x) } else { None }
 }
 
 pub fn part_1(input: &str) -> Option<i64> {
@@ -97,21 +97,28 @@ pub fn part_1(input: &str) -> Option<i64> {
 }
 
 /// This optimization algorithm assumes that each monkey yells to another one.
-fn optimize(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) {
+fn optimize(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) -> Option<Mn> {
     use OpType::*;
     let mut hs = HashSet::new();
+    let mut hv = None;
     queue.push(start);
     while let Some(cm) = queue.pop() {
         let cv = map[&cm];
-        if let Op(a, op, b) = cv {
+        if let O(a, op, b) = cv {
             let av = map[&a];
             let bv = map[&b];
+            if a == M_HUMN || b == M_HUMN {
+                hv = Some(queue[1])
+            }
             if a != M_HUMN && b != M_HUMN {
-                if let (Num(na), Num(nb)) = (&av, &bv) {
+                if let (N(na), N(nb)) = (&av, &bv) {
+                    if matches!(op, Op::Mul) && (na > &20 || nb > &20) {
+                        continue;
+                    }
                     map.remove(&a);
                     map.remove(&b);
                     let nn = op.do_op(*na, *nb);
-                    map.insert(cm, Num(nn));
+                    map.insert(cm, N(nn));
                     continue;
                 }
             }
@@ -127,45 +134,93 @@ fn optimize(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn) {
         }
     }
     map.shrink_to_fit();
+    hv
+}
+
+fn resolve(map: &mut HashMap<Mn, OpType>, queue: &mut Vec<Mn>, start: Mn, rv: i64) -> Option<i64> {
+    use OpType::*;
+    queue.push(start);
+    let mut opv = vec![];
+    while let Some(cm) = queue.pop() {
+        let cv = map[&cm];
+        if let O(a, op, b) = cv {
+            let av = map[&a];
+            let bv = map[&b];
+            if a == M_HUMN || b == M_HUMN {
+                let N(on) = (if a == M_HUMN { bv } else { av }) else { panic!("Not optimized!") };
+                opv.push((op, on));
+            } else if opv.len() > 0 {
+                let on = match (av, bv) {
+                    (N(_), N(_)) | (O(_, _, _), O(_, _, _)) => panic!("Not optimized!"),
+                    (N(x), O(_, _, _)) => x,
+                    (O(_, _, _), N(x)) => x
+                };
+                opv.push((op, on));
+            } else {
+                queue.push(cm);
+                if is_op!(av) {
+                    queue.push(a);
+                }
+                if is_op!(bv) {
+                    queue.push(b);
+                }
+            }
+        }
+    }
+    let mut uhs = HashSet::new();
+    uhs.insert(rv);
+    while let Some((o, n)) = opv.pop() {
+        let cuv = uhs.drain().collect::<Vec<_>>();
+        for v in cuv {
+            match o {
+                Op::Div => {
+                    let mv = v * n;
+                    uhs.extend(mv..mv+n);
+                }
+                Op::Add => { uhs.insert(v - n); }
+                Op::Sub => { uhs.insert(v + n); }
+                Op::Mul => { uhs.insert(v / n); }
+            }
+        }
+    }
+    uhs.into_iter().min()
+    
 }
 
 pub fn part_2(input: &str) -> Option<i64> {
     use OpType::*;
-    use std::cmp::Ordering::*;
 
     let mut m = input.lines().map(parse_line).collect::<HashMap<_, _>>();
     let mut q: Vec<Mn> = Vec::new();
-    let Op(ma, _, mb) = m[&M_ROOT] else { return None; };
-    optimize(&mut m, &mut q, M_ROOT);
-    let (calc, comp) = match (&m[&ma], &m[&mb]) {
-        (Num(_), Op(_, _, _)) => (ma, mb),
-        (Op(_, _, _), Num(_)) => (mb, ma),
-        (Op(_, _, _), Op(_, _, _)) | (Num(_), Num(_)) => panic!("This cannot be solved here!"),
-    };
-    let OpType::Num(calcv) = m[&calc] else { return None; };
-    let mut hv = 0;
-    let mut d = 1 << 48; // Arbitrary number
-    let mut check = false;
-    loop {
-        let mut cm = m.clone();
-        *cm.get_mut(&M_HUMN).unwrap() = Num(hv);
-
-        let x = calculate(&mut cm, &mut q, comp)?;
-        if check {
-            if x != calcv {
-                return Some(hv+1);
-            }
-            hv -= 1;
-        } else {
-            match x.cmp(&calcv) {
-                Less => {
-                    d /= 2;
-                    hv -= d;
-                },
-                Equal => {
-                    check = true
-                },
-                Greater => hv += d,
+    let O(ma, _, mb) = m[&M_ROOT] else { return None; };
+    let ccom = optimize(&mut m, &mut q, M_ROOT).unwrap();
+    let (calc, comp) = if ccom == ma { (mb, ma) } else { (ma, mb) };
+    let calcv = calculate(&mut m, &mut q, calc).unwrap();
+    if cfg!(test) {
+        resolve(&mut m.clone(), &mut q, comp, calcv)
+    } else {
+        let mut hn = 0;
+        let mut dt = 1 << 26;
+        loop {
+            *m.get_mut(&M_HUMN).unwrap() = N(hn);
+            let mut cm = m.clone();
+            let x = calculate(&mut cm, &mut q, comp).unwrap();
+            if x == calcv {
+                loop {
+                    *m.get_mut(&M_HUMN).unwrap() = N(hn-1);
+                    let mut cm = m.clone();
+                    let x = calculate(&mut cm, &mut q, comp).unwrap();
+                    if x != calcv {
+                        break;
+                    }
+                    hn -= 1;
+                }
+                return Some(hn);
+            } else if x < calcv {
+                hn -= (dt << 1)-1;
+                dt >>= 1;
+            } else {
+                hn += dt;
             }
         }
     }
