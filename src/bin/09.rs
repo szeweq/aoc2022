@@ -5,7 +5,7 @@
 
 use std::collections::HashSet;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Pt {
     x: i32,
     y: i32,
@@ -119,14 +119,15 @@ fn adv(pos: &mut [Pt]) {
 }
 
 pub fn part_2(input: &str) -> Option<u32> {
-    let mut pp: &mut [Pt; 10] = &mut [pt![], pt![], pt![], pt![], pt![], pt![], pt![], pt![], pt![], pt![]];
+    let mut pp: &mut [Pt; 10] = &mut [pt![]; 10];
     let mut paths: HashSet<Pt> = HashSet::new();
     for l in input.lines() {
         let (side, st) = parse_step(l);
-        for _ in 0..st {
+        let one = st.signum();
+        for _ in 0..st.abs() {
             match side {
-                Side::X => pp[0].x += 1,
-                Side::Y => pp[0].y += 1
+                Side::X => pp[0].x += one,
+                Side::Y => pp[0].y += one
             }
             adv(pp);
             paths.insert(pp[9].clone());
