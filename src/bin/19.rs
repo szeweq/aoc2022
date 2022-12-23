@@ -28,15 +28,11 @@ macro_rules! set_min {
 
 trait MineState {
     fn spend(&self, cost: u32) -> Self;
-    fn add1(&self) -> Self;
 }
 
 impl MineState for (u32, u32) {
     fn spend(&self, cost: u32) -> Self {
         (self.0, self.1 - cost)
-    }
-    fn add1(&self) -> Self {
-        (self.0 + 1, self.1)
     }
 }
 
@@ -48,6 +44,7 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> u32 {
     let mut hs = HashSet::new();
     let mut max_geode = 0;
     let mut lt = time;
+    let mut update = Vec::new();
     while let Some((cs, t)) = vq.pop_front() {
         let [
             mut s_ore,
@@ -92,42 +89,45 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> u32 {
         s_obs.1 += s_obs.0;
         s_geo.1 += s_geo.0;
 
-        vq.push_back(([s_ore, s_clay, s_obs, s_geo], nt));
+        update.push(([s_ore, s_clay, s_obs, s_geo], nt));
         if lco >= c_ore {
             let ns_ore = (s_ore.0 + 1, s_ore.1 - c_ore);
-            vq.push_back(([ns_ore, s_clay, s_obs, s_geo], nt));
+            update.push(([ns_ore, s_clay, s_obs, s_geo], nt));
         }
         if lco >= c_clay {
             let ns_ore = s_ore.spend(c_clay);
-            let ns_clay = s_clay.add1();
-            vq.push_back(([ns_ore, ns_clay, s_obs, s_geo], nt));
+            let ns_clay = (s_clay.0 + 1, s_clay.1);
+            update.push(([ns_ore, ns_clay, s_obs, s_geo], nt));
         }
         if lco >= c_obs_o && lcc >= c_obs_c {
             let ns_ore = s_ore.spend(c_obs_o);
             let ns_clay = s_clay.spend(c_obs_c);
-            let ns_obs = s_obs.add1();
-            vq.push_back(([ns_ore, ns_clay, ns_obs, s_geo], nt));
+            let ns_obs = (s_obs.0 + 1, s_obs.1);
+            update.push(([ns_ore, ns_clay, ns_obs, s_geo], nt));
         }
         if lco >= c_geo_o && lcb >= c_geo_b {
             let ns_ore = s_ore.spend(c_geo_o);
             let ns_obs = s_obs.spend(c_geo_b);
-            let ns_geo = s_geo.add1();
-            vq.push_back(([ns_ore, s_clay, ns_obs, ns_geo], nt));
+            let ns_geo = (s_geo.0 + 1, s_geo.1);
+            update.push(([ns_ore, s_clay, ns_obs, ns_geo], nt));
         }
+        vq.extend(&update);
+        update.clear();
     }
     max_geode
 }
 
 pub fn part_1(input: &str) -> Option<u32> {
-    Some(input.lines().map(parse_line)
-        .enumerate()
+    let bpv = input.lines().map(parse_line).enumerate().collect::<Vec<_>>();
+    Some(bpv.into_iter()
         .map(|(i, c)| (i as u32 + 1) * sim_blueprint(24, c))
         .sum()
     )
 }
 
 pub fn part_2(input: &str) -> Option<u32> {
-    Some(input.lines().take(3).map(parse_line)
+    let bpv = input.lines().take(3).map(parse_line).collect::<Vec<_>>();
+    Some(bpv.into_iter()
         .map(|c| sim_blueprint(32, c))
         .product()
     )
