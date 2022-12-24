@@ -28,7 +28,8 @@ fn parse(input: &str) -> Vec<Vec<u8>> {
     grid
 }
 
-fn air_at(grid: &Vec<Vec<u8>>, x: usize, y: usize, t: usize) -> u8 {
+fn clear_at(grid: &Vec<Vec<u8>>, p: (usize, usize), t: usize) -> bool {
+    let (x, y) = p;
     let xl = grid[y].len();
     let yl = grid.len();
     let xt = t % xl;
@@ -37,34 +38,37 @@ fn air_at(grid: &Vec<Vec<u8>>, x: usize, y: usize, t: usize) -> u8 {
     let ld = grid[(y+yt)%yl][x] & 8;
     let ll = grid[y][(x+xl-xt)%xl] & 1;
     let lr = grid[y][(x+xt)%xl] & 4;
-    lu | ld | ll | lr
+    (lu | ld | ll | lr) == 0
 }
 
 fn travel(grid: &Vec<Vec<u8>>, from: (usize, usize), to: (usize, usize), time: usize) -> usize {
     let mut pos_hs = HashSet::new();
     pos_hs.insert(from);
+    let mut upos = HashSet::new();
     let mut t = time;
     let size = (grid[0].len(), grid.len());
-    while air_at(grid, from.0, from.1, t) != 0 {
+    while !clear_at(grid, from, t) {
         t += 1;
     }
-    while !pos_hs.contains(&to) {
+    'l1: loop {
         t += 1;
-        let mut npos_hs = HashSet::new();
         for p in &pos_hs {
             for m in MOVES {
                 let dp = (p.0.wrapping_add_signed(m.0), p.1.wrapping_add_signed(m.1));
                 if dp.0 < size.0 && dp.1 < size.1 {
-                    let at = air_at(&grid, dp.0, dp.1, t);
-                    if at == 0 {
-                        npos_hs.insert(dp);
+                    if clear_at(&grid, dp, t) {
+                        if dp == to {
+                            break 'l1;
+                        }
+                        upos.insert(dp);
                     }
                 }
             }
         }
-        if !npos_hs.is_empty() {
+        if !upos.is_empty() {
             pos_hs.clear();
-            pos_hs.extend(npos_hs);
+            pos_hs.extend(&upos);
+            upos.clear();
         }
     }
     t + 1
