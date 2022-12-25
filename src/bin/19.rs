@@ -26,19 +26,14 @@ macro_rules! set_min {
     };
 }
 
-trait MineState {
-    fn spend(&self, cost: u32) -> Self;
-}
-
-impl MineState for (u32, u32) {
-    fn spend(&self, cost: u32) -> Self {
-        (self.0, self.1 - cost)
-    }
-}
+const M_ORE: usize = 0;
+const M_CLAY: usize = 1;
+const M_OBS: usize = 2;
+const M_GEODE: usize = 3;
 
 fn sim_blueprint(time: u32, costs: [u32; 6]) -> u32 {
     let [c_ore, c_clay, c_obs_o, c_obs_c, c_geo_o, c_geo_b] = costs;
-    let state: [(u32, u32); 4] = [(1, 0), (0, 0), (0, 0), (0, 0)];
+    let state: [[u32; 4]; 2] = [[1, 0, 0, 0], [0, 0, 0, 0]];
     let ototal = c_ore.max(c_clay).max(c_obs_o).max(c_geo_o);
     let mut vq = VecDeque::from([(state, time)]);
     let mut hs = HashSet::new();
@@ -46,70 +41,72 @@ fn sim_blueprint(time: u32, costs: [u32; 6]) -> u32 {
     let mut lt = time;
     let mut update = Vec::new();
     while let Some((cs, t)) = vq.pop_front() {
-        let [
-            mut s_ore,
-            mut s_clay,
-            mut s_obs,
-            mut s_geo
-        ] = cs;
+        let [mut miners, mut mats] = cs;
         
         if t == 0 {
-            if max_geode < s_geo.1 {
-                max_geode = s_geo.1;
+            if max_geode < mats[M_GEODE] {
+                max_geode = mats[M_GEODE];
             }
             continue;
         }
 
-        set_min!(s_ore.0, ototal);
-        set_min!(s_clay.0, c_obs_c);
-        set_min!(s_obs.0, c_geo_b);
+        set_min!(miners[M_ORE], ototal);
+        set_min!(miners[M_CLAY], c_obs_c);
+        set_min!(miners[M_OBS], c_geo_b);
 
         
         let nt = t - 1;
-        let mine_ore = t * ototal - s_ore.0 * nt;
-        set_min!(s_ore.1, mine_ore);
-        let mine_clay = t * c_obs_c - s_clay.0 * nt;
-        set_min!(s_clay.1, mine_clay);
-        let mine_obs = t * c_geo_b - s_obs.0 * nt;
-        set_min!(s_obs.1, mine_obs);
+        let mine_ore = t * ototal - miners[M_ORE] * nt;
+        set_min!(mats[M_ORE], mine_ore);
+        let mine_clay = t * c_obs_c - miners[M_CLAY] * nt;
+        set_min!(mats[M_CLAY], mine_clay);
+        let mine_obs = t * c_geo_b - miners[M_OBS] * nt;
+        set_min!(mats[M_OBS], mine_obs);
 
         if lt > t {
             hs.clear();
             lt = t;
-        } else if lt == t && !hs.insert(([s_ore, s_clay, s_obs, s_geo], t)) {
+        } else if lt == t && !hs.insert([miners, mats]) {
             continue;
         }
 
-        let lco = s_ore.1;
-        let lcc = s_clay.1;
-        let lcb = s_obs.1;
+        let [lco, lcc, lcb, _] = mats;
 
-        s_ore.1 += s_ore.0;
-        s_clay.1 += s_clay.0;
-        s_obs.1 += s_obs.0;
-        s_geo.1 += s_geo.0;
+        mats[M_ORE] += miners[M_ORE];
+        mats[M_CLAY] += miners[M_CLAY];
+        mats[M_OBS] += miners[M_OBS];
+        mats[M_GEODE] += miners[M_GEODE];
 
-        update.push(([s_ore, s_clay, s_obs, s_geo], nt));
+        update.push(([miners, mats], nt));
         if lco >= c_ore {
-            let ns_ore = (s_ore.0 + 1, s_ore.1 - c_ore);
-            update.push(([ns_ore, s_clay, s_obs, s_geo], nt));
+            let mut nminers = miners.clone();
+            let mut nmats = mats.clone();
+            nminers[M_ORE] += 1;
+            nmats[M_ORE] -= c_ore;
+            update.push(([nminers, nmats], nt));
         }
         if lco >= c_clay {
-            let ns_ore = s_ore.spend(c_clay);
-            let ns_clay = (s_clay.0 + 1, s_clay.1);
-            update.push(([ns_ore, ns_clay, s_obs, s_geo], nt));
+            let mut nminers = miners.clone();
+            let mut nmats = mats.clone();
+            nminers[M_CLAY] += 1;
+            nmats[M_ORE] -= c_clay;
+            update.push(([nminers, nmats], nt));
         }
         if lco >= c_obs_o && lcc >= c_obs_c {
-            let ns_ore = s_ore.spend(c_obs_o);
-            let ns_clay = s_clay.spend(c_obs_c);
-            let ns_obs = (s_obs.0 + 1, s_obs.1);
-            update.push(([ns_ore, ns_clay, ns_obs, s_geo], nt));
+            let mut nminers = miners.clone();
+            let mut nmats = mats.clone();
+            nminers[M_OBS] += 1;
+            nmats[M_ORE] -= c_obs_o;
+            nmats[M_CLAY] -= c_obs_c;
+            update.push(([nminers, nmats], nt));
         }
         if lco >= c_geo_o && lcb >= c_geo_b {
-            let ns_ore = s_ore.spend(c_geo_o);
-            let ns_obs = s_obs.spend(c_geo_b);
-            let ns_geo = (s_geo.0 + 1, s_geo.1);
-            update.push(([ns_ore, s_clay, ns_obs, ns_geo], nt));
+            let mut nminers = miners.clone();
+            let mut nmats = mats.clone();
+            nminers[M_GEODE] += 1;
+            nmats[M_ORE] -= c_geo_o;
+            nmats[M_OBS] -= c_geo_b;
+            update.push(([nminers, nmats], nt));
         }
         vq.extend(&update);
         update.clear();
