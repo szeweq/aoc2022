@@ -1,3 +1,7 @@
+/*
+ * Day 25: Full of Hot Air
+ * See [https://adventofcode.com/2022/day/25]
+ */
 
 fn parse_line(line: &str) -> isize {
     let mut sum = 0;
@@ -16,23 +20,16 @@ fn parse_line(line: &str) -> isize {
     sum
 }
 
+const NUM_CH: [char; 5] = ['0', '1', '2', '=', '-'];
+
 fn fmt_num(num: isize) -> String {
     let mut wn = num;
     let mut chv = Vec::new();
     while wn > 0 {
-        match wn % 5 {
-            0 => { chv.push('0') }
-            1 => { chv.push('1') }
-            2 => { chv.push('2') }
-            3 => {
-                chv.push('=');
-                wn += 2;
-            }
-            4 => {
-                chv.push('-');
-                wn += 1;
-            },
-            _ => {}
+        let dp = wn % 5;
+        chv.push(NUM_CH[dp as usize]);
+        if dp > 2 {
+            wn += 5 - dp;
         }
         wn /= 5;
     }
