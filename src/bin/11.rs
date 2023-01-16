@@ -65,18 +65,34 @@ fn parse_monkeys(input: &str) -> (Vec<Vec<u64>>, Vec<Monkey>) {
     v
 }
 
-fn op_item(item: u64, op: &MonkeyOp) -> u64 {
+fn op_item(item: u64, op: &MonkeyOp, lcd: u64) -> u64 {
     use MonkeyOp::*;
-    match *op {
+    let m = match *op {
         Add(x) => item + x,
         Mul(x) => item * x,
         Sqr => item * item
+    };
+    if lcd == 0 { m / 3 } else { m % lcd }
+}
+
+fn monkey_calc(vv: &mut Vec<Vec<u64>>, vm: &Vec<Monkey>, vi: &mut Vec<usize>, lcd: u64) {
+    let vsz = vm.len();
+    for i in 0..vsz {
+        let m = &vm[i];
+        let sz = vv[i].len();
+        vi[i] += sz;
+        for it in 0..sz {
+            let oi = op_item(vv[i][it], &m.op, lcd);
+            let thr = if oi % m.div == 0 { m.throw_true } else { m.throw_false };
+            vv[thr].push(oi);
+        }
+        vv[i].clear();
     }
 }
 
 fn monkey_val(v: &mut Vec<usize>) -> Option<usize> {
-    v.sort_by(|a, b| b.cmp(a));
-    Some(v.iter().take(2).product())
+    v.sort();
+    Some(v.iter().rev().take(2).product())
 }
 
 pub fn part_1(input: &str) -> Option<usize> {
@@ -84,17 +100,7 @@ pub fn part_1(input: &str) -> Option<usize> {
     let vsz = vm.len();
     let mut vi: Vec<usize> = vec![0; vsz];
     for _ in 0..20 {
-        for i in 0..vsz {
-            let m = &vm[i];
-            let sz = vv[i].len();
-            vi[i] += sz;
-            for it in 0..sz {
-                let oi = op_item(vv[i][it], &m.op) / 3;
-                let thr = if oi % m.div == 0 { m.throw_true } else { m.throw_false };
-                vv[thr].push(oi);
-            }
-            vv[i].clear();
-        }
+        monkey_calc(&mut vv, &vm, &mut vi, 0);
     }
     monkey_val(&mut vi)
 }
@@ -105,17 +111,7 @@ pub fn part_2(input: &str) -> Option<usize> {
     let mut vi: Vec<usize> = vec![0; vsz];
     let lcd: u64 = vm.iter().map(|m| m.div).product();
     for _ in 0..10000 {
-        for i in 0..vsz {
-            let m = &vm[i];
-            let sz = vv[i].len();
-            vi[i] += sz;
-            for it in 0..sz {
-                let oi = op_item(vv[i][it], &m.op) % lcd;
-                let thr = if oi % m.div == 0 { m.throw_true } else { m.throw_false };
-                vv[thr].push(oi);
-            }
-            vv[i].clear();
-        }
+        monkey_calc(&mut vv, &vm, &mut vi, lcd);
     }
     monkey_val(&mut vi)
 }
