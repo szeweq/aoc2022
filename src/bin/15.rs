@@ -42,7 +42,6 @@ pub fn part_1(input: &str) -> Option<usize> {
         }
     }
     Some(xsum)
-    //Some(chx.iter().filter(|(_, &b)| !b).count())
 }
 
 pub fn part_2(input: &str) -> Option<i64> {
