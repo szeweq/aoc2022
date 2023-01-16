@@ -3,7 +3,7 @@
  * See [https://adventofcode.com/2022/day/15]
  */
 
-use std::collections::{HashMap};
+use std::collections::HashSet;
 
 fn parse_sensors(input: &str) -> Vec<((i32, i32), (i32, i32))> {
     input.lines().map(|l| {
@@ -21,10 +21,11 @@ fn parse_sensors(input: &str) -> Vec<((i32, i32), (i32, i32))> {
 pub fn part_1(input: &str) -> Option<usize> {
     let vals = parse_sensors(input);
     let chy = if cfg!(test) { 10 } else { 2000000 };
-    let mut chx = HashMap::new();
+    let mut xsum = 0;
+    let mut chx = HashSet::new();
     for (s, b) in vals {
         if b.1 == chy {
-            chx.insert(b.0, true);
+            chx.insert(b.0);
         }
         let strength = ((s.0.abs_diff(b.0)) + (s.1.abs_diff(b.1))) as i32;
         let my = s.1.abs_diff(chy) as i32;
@@ -33,13 +34,15 @@ pub fn part_1(input: &str) -> Option<usize> {
             let cx1 = s.0 - cs;
             let cx2 = s.0 + cs;
             for xc in cx1..=cx2 {
-                if chx.get(&xc).is_none() {
-                    chx.insert(xc, false);
+                if !chx.contains(&xc) {
+                    xsum += 1;
+                    chx.insert(xc);
                 }
             }
         }
     }
-    Some(chx.iter().filter(|(_, &b)| !b).count())
+    Some(xsum)
+    //Some(chx.iter().filter(|(_, &b)| !b).count())
 }
 
 pub fn part_2(input: &str) -> Option<i64> {
