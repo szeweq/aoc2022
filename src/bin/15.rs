@@ -5,16 +5,16 @@
 
 use std::collections::HashSet;
 
-fn parse_sensors(input: &str) -> Vec<((i32, i32), (i32, i32))> {
+fn parse_sensors(input: &str) -> Vec<((i32, i32), (i32, i32), i32)> {
     input.lines().map(|l| {
         let (a, b) = l.split_once(':').unwrap();
         let (aa, ab) = a.split_once(',').unwrap();
         let (ba, bb) = b.split_once(',').unwrap();
-        let x1 = aa[12..].parse().unwrap();
-        let y1 = ab[3..].parse().unwrap();
+        let x1: i32 = aa[12..].parse().unwrap();
+        let y1: i32 = ab[3..].parse().unwrap();
         let x2 = ba[24..].parse().unwrap();
         let y2 = bb[3..].parse().unwrap();
-        ((x1, y1), (x2, y2))
+        ((x1, y1), (x2, y2), ((x1.abs_diff(x2)) + (y1.abs_diff(y2))) as i32)
     }).collect::<Vec<_>>()
 }
 
@@ -23,14 +23,13 @@ pub fn part_1(input: &str) -> Option<usize> {
     let chy = if cfg!(test) { 10 } else { 2000000 };
     let mut xsum = 0;
     let mut chx = HashSet::new();
-    for (s, b) in vals {
+    for (s, b, st) in vals {
         if b.1 == chy {
             chx.insert(b.0);
         }
-        let strength = ((s.0.abs_diff(b.0)) + (s.1.abs_diff(b.1))) as i32;
         let my = s.1.abs_diff(chy) as i32;
-        if strength > my {
-            let cs = strength - my;
+        if st > my {
+            let cs = st - my;
             let cx1 = s.0 - cs;
             let cx2 = s.0 + cs;
             for xc in cx1..=cx2 {
@@ -49,14 +48,13 @@ pub fn part_2(input: &str) -> Option<i64> {
     let zq = if cfg!(test) { 20 } else { 4000000 };
     for y in 0..=zq {
         let mut ranges = Vec::new();
-        for (s, b) in &vals {
-            let strength = ((s.0.abs_diff(b.0)) + (s.1.abs_diff(b.1))) as i32;
-            let my = s.1.abs_diff(y) as i32;
-            let cs = strength - my;
+        for ((sx, sy), _, st) in &vals {
+            let my = sy.abs_diff(y) as i32;
+            let cs = st - my;
             if cs < 0 {
                 continue;
             }
-            ranges.push((s.0-cs, s.0+cs));
+            ranges.push((sx-cs, sx+cs));
         }
         ranges.sort();
         let mut comp = Vec::new();
