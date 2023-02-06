@@ -18,7 +18,9 @@ struct FS {
 
 impl FS {
     fn new() -> Self {
-        Self { nodes: vec![FTree::root()] }
+        Self { nodes: vec![
+            FTree { parent: None, name: "".to_string(), dir: true, children: Vec::new(), size: 0 }
+        ] }
     }
 
     fn find_dir(&self, top: usize, name: &str) -> Option<&usize> {
@@ -43,12 +45,6 @@ impl FS {
             tft = &mut self.nodes[pp];
             tft.size += size;
         }
-    }
-}
-
-impl FTree {
-    fn root() -> Self {
-        Self { parent: None, name: "".to_string(), dir: true, children: Vec::new(), size: 0 }
     }
 }
 
