@@ -65,7 +65,7 @@ fn update_elf_pos(hm: &mut HashSet<Pt>, dir: usize) -> usize {
 pub fn part_1(input: &str) -> Option<isize> {
     let mut hm = parse_map(input);
     for r in 0..10 {
-        update_elf_pos(&mut hm, r%4);
+        update_elf_pos(&mut hm, r);
     }
     let l = hm.len() as isize;
     let mut itr = hm.into_iter();
