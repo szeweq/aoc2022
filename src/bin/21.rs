@@ -44,8 +44,8 @@ macro_rules! mn {
     };
 }
 
-const M_ROOT: Mn = mn![b"root"];
-const M_HUMN: Mn = mn![b"humn"];
+const M_ROOT: Mn = u32::from_ne_bytes(*b"root");
+const M_HUMN: Mn = u32::from_ne_bytes(*b"humn");
 
 fn parse_line(l: &str) -> (Mn, OpType) {
     let bl = l.as_bytes();
@@ -54,7 +54,7 @@ fn parse_line(l: &str) -> (Mn, OpType) {
     let op = if id { OpType::N(l[6..].parse().unwrap()) } else {
         let a = mn![bl; 6];
         let b = mn![bl; 13];
-        let o = match l.as_bytes()[11] {
+        let o = match bl[11] {
             b'+' => Op::Add,
             b'-' => Op::Sub,
             b'*' => Op::Mul,
