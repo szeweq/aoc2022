@@ -33,48 +33,36 @@ pub fn part_1(input: &str) -> Option<usize> {
 
 pub fn part_2(input: &str) -> Option<usize> {
     let grid = input_grid(input);
-    let lrows = grid.len();
-    let lcols = grid[0].len();
+    let lh = grid.len() - 1;
+    let lw = grid[0].len() - 1;
     let mut vmax: usize = 0;
 
-    for j in 1..lrows - 1 {
+    for j in 1..lh {
         let row = grid[j];
-        for i in 1..lcols - 1 {
+        for i in 1..lw {
             let el = row[i];
             let rowfn = |&z| el <= z;
             let gridln = |&z: &&[u8]| el <= z[i];
 
-            let t = {
-                let vtop = &grid[..j];
-                if let Some(x) = vtop.iter().rev().position(gridln) {
-                    x + 1
-                } else {
-                    vtop.len()
-                }
+            let t = if let Some(x) = &grid[..j].iter().rev().position(gridln) {
+                x + 1
+            } else {
+                j
             };
-            let l = {
-                let vleft = &row[..i];
-                if let Some(x) = vleft.iter().rev().position(rowfn) {
-                    x + 1
-                } else {
-                    vleft.len()
-                }
+            let l = if let Some(x) = &row[..i].iter().rev().position(rowfn) {
+                x + 1
+            } else {
+                i
             };
-            let r = {
-                let vright = &row[i + 1..];
-                if let Some(x) = vright.iter().position(rowfn) {
-                    x + 1
-                } else {
-                    vright.len()
-                }
+            let r = if let Some(x) = &row[i + 1..].iter().position(rowfn) {
+                x + 1
+            } else {
+                lh - i
             };
-            let b = {
-                let vbottom = &grid[j + 1..];
-                if let Some(x) = vbottom.iter().position(gridln) {
-                    x + 1
-                } else {
-                    vbottom.len()
-                }
+            let b = if let Some(x) = &grid[j + 1..].iter().position(gridln) {
+                x + 1
+            } else {
+                lw - j
             };
 
             let val = t * l * r * b;
