@@ -30,26 +30,21 @@ fn cmp_packets(left: &Packet, right: &Packet, depth: usize) -> Ordering {
     use Packet::*;
     match (left, right) {
         (N(l), N(r)) => {
-            println!("NN {}: {} with {}", depth, l, r);
             l.cmp(r)
         },
-        (L(l), N(n)) => {
-            println!("LN {}: {:?} with {}", depth, l, n);
+        (L(_), N(_)) => {
             cmp_packets(left, &Packet::L(vec![right.clone()]), depth + 1)
         }
-        (N(n), L(l)) => {
-            println!("NL {}: {} with {:?}", depth, n, l);
+        (N(_), L(_)) => {
             cmp_packets(&Packet::L(vec![left.clone()]), right, depth + 1)
         }
         (L(l), L(r)) => {
-            println!("LL {}: {:?} with {:?}", depth, l, r);
             for (i1, i2) in l.iter().zip(r) {
                 let result = cmp_packets(i1, i2, depth + 1);
                 if result != Ordering::Equal {
                     return result;
                 }
             }
-            println!("ZZ {}: len {} with len {}", depth, l.len(), r.len());
             l.len().cmp(&r.len())
         }
     }
