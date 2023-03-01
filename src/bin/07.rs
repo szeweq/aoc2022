@@ -52,10 +52,11 @@ fn parse_tree(input: &str) -> FS {
     let mut fs = FS::new();
     let mut cd = 0;
     for l in input.lines() {
-        let bl = l.as_bytes();
-        match bl[0] {
+        let bl = l.as_bytes()[0];
+        let mut sp = l.split_ascii_whitespace();
+        match bl {
             b'$' => {
-                let mut sp = l.split_ascii_whitespace().skip(1);
+                sp.next();
                 match sp.next().expect("No command given") {
                     "cd" => {
                         cd = match sp.next().expect("Unknown dir type") {
@@ -71,23 +72,21 @@ fn parse_tree(input: &str) -> FS {
                         };
                     }
                     "ls" => {}
-                    x => { println!("Unknown command: {}", x); }
+                    x => { panic!("Unknown command: {}", x); }
                 }
             },
             x if (b'0'..=b'9').contains(&x) => {
-                let mut sp = l.split_ascii_whitespace();
                 let n = sp.next().and_then(|d| d.parse::<u32>().ok()).expect("Unknown size");
                 let d = sp.next().unwrap();
                 fs.add(cd, d.clone(), false, n);
             },
             b'd' => {
-                let mut sp = l.split_ascii_whitespace();
-                sp.next().unwrap();
+                sp.next();
                 let d = sp.next().unwrap();
                 fs.add(cd, d.clone(), true, 0);
             }
             _ => {
-                println!("Invalid line: {}", l);
+                panic!("Invalid line: {}", l);
             }
         }
     }
