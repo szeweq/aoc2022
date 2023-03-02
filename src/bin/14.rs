@@ -3,7 +3,7 @@
  * See [https://adventofcode.com/2022/day/14]
  */
 
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 fn parse_path(input: &str) -> Vec<Vec<(u32, u32)>> {
     input.lines().map(|l| {

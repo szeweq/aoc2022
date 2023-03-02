@@ -2,7 +2,7 @@
  * Day 16: Proboscidea Volcanium
  * See [https://adventofcode.com/2022/day/16]
  */
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 fn parse_vals(input: &str) -> (HashMap<&str, (usize, Vec<&str>)>, Vec<&str>) {
     let mut m = HashMap::new();
