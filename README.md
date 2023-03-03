@@ -12,6 +12,8 @@ There are no explainations or comments to these solutions. Also there are mangle
 |[19](src/bin/19.rs)|[20](src/bin/20.rs)|[21](src/bin/21.rs)|[22](src/bin/22.rs)|[23](src/bin/23.rs)|[24](src/bin/24.rs)|[25](src/bin/25.rs)|
 |~~26~~|~~27~~|~~28~~|~~29~~|~~30~~|~~31~~|  |
 
+Check out [Online Solvers available on my website](https://szeweq.xyz/aoc/2022)!
+
 ## Inputs
 Add inputs in text files matching a binary name, like `01.txt`, into the `inputs/` directory.
 
