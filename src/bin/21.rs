@@ -52,28 +52,35 @@ impl MTree {
     fn new(input: &str) -> Self {
         Self (input.lines().map(parse_line).collect())
     }
-    fn calc(&mut self, start: Mn) -> Option<i64> {
+    fn calc(&self, start: Mn) -> i64 {
         use OpType::*;
         let mut q = vec![start];
+        let mut vals = HashMap::with_capacity(self.0.len());
         while let Some(cm) = q.last() {
-            if let O(a, op, b) = &self.0[cm] {
-                let av = self.0[a];
-                let bv = self.0[b];
-                if let (N(na), N(nb)) = (av, bv) {
-                    let nn = op.do_op(na, nb);
-                    self.0.insert(*cm, N(nn));
+            match self.0[cm] {
+                N(x) => {
+                    vals.insert(*cm, x);
                     q.pop();
-                    continue;
                 }
-                if is_op!(av) {
-                    q.push(*a);
-                }
-                if is_op!(bv) {
-                    q.push(*b);
+                O(a, op, b) => {
+                    let av = vals.get(&a);
+                    let bv = vals.get(&b);
+                    if let (Some(&na), Some(&nb)) = (av, bv) {
+                        let nn = op.do_op(na, nb);
+                        vals.insert(*cm, nn);
+                        q.pop();
+                        continue;
+                    }
+                    if av.is_none() {
+                        q.push(a);
+                    }
+                    if bv.is_none() {
+                        q.push(b);
+                    }
                 }
             }
         }
-        if let OpType::N(x) = self.0[&start] { Some(x) } else { None }
+        vals[&start]
     }
 
     /// This optimization algorithm assumes that each monkey yells to another one.
@@ -186,7 +193,7 @@ fn parse_line(l: &str) -> (Mn, OpType) {
 }
 
 pub fn part_1(input: &str) -> Option<i64> {
-    MTree::new(input).calc(M_ROOT)
+    Some(MTree::new(input).calc(M_ROOT))
 }
 
 
@@ -196,7 +203,7 @@ pub fn part_2(input: &str) -> Option<i64> {
     let O(ma, _, mb) = mt.0[&M_ROOT] else { return None; };
     let ccom = mt.optimize(M_ROOT).unwrap();
     let (calc, comp) = if ccom == ma { (mb, ma) } else { (ma, mb) };
-    let calcv = mt.calc(calc).unwrap();
+    let calcv = mt.calc(calc);
     if cfg!(test) {
         mt.resolve(comp, calcv)
     } else {
@@ -204,13 +211,11 @@ pub fn part_2(input: &str) -> Option<i64> {
         let mut dt = 1 << 26;
         loop {
             *mt.0.get_mut(&M_HUMN).unwrap() = N(hn);
-            let mut nmt = MTree (mt.0.clone());
-            let x = nmt.calc(comp).unwrap();
+            let x = mt.calc(comp);
             if x == calcv {
                 loop {
                     *mt.0.get_mut(&M_HUMN).unwrap() = N(hn-1);
-                    let mut nmt = MTree (mt.0.clone());
-                    let x = nmt.calc(comp).unwrap();
+                    let x = mt.calc(comp);
                     if x != calcv {
                         break;
                     }
