@@ -20,7 +20,7 @@ fn main() {
 }
 
 fn day_from_arg() -> Option<u8> {
-    let a = std::env::args().skip(1).next()?;
+    let a = std::env::args().nth(1)?;
     a.parse::<u8>().ok()
 }
 
