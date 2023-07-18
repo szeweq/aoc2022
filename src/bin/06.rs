@@ -3,8 +3,6 @@
  * See [https://adventofcode.com/2022/day/6]
  */
 
-use std::collections::{HashMap};
-
 pub fn part_1(input: &str) -> Option<u32> {
     let b = input.as_bytes();
     let mut sol = 0;
@@ -21,26 +19,16 @@ pub fn part_1(input: &str) -> Option<u32> {
 
 pub fn part_2(input: &str) -> Option<u32> {
     let b = input.as_bytes();
-    let mut sol = 0;
-    let mut hm: HashMap<u8, usize> = HashMap::with_capacity(15);
-    let mut x = 13;
-
-    'l: while x < b.len() {
-        hm.clear();
-        for i in 0..14 {
-            let val = b[x-13+i];
-            match hm.insert(val, i) {
-                Some(m) => {
-                    x += 1 + m;
-                    continue 'l;
-                }
-                None => {}
-            }
-        }
-        sol = x as u32 + 1;
-        break;
-    }
-    Some(sol)
+    let mut fbits = 0u32;
+    b.iter().take(13).for_each(|c| fbits ^= 1 << (c % 32));
+    b.windows(14).position(|w| {
+        let fst = w[0];
+        let lst = w[w.len() - 1];
+        fbits ^= 1 << (lst % 32);
+        let res = fbits.count_ones() == 14;
+        fbits ^= 1 << (fst % 32);
+        res
+    }).map(|x| (x + 14) as u32)
 }
 
 aoc2022::solve!(part_1, part_2);
