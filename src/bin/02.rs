@@ -4,7 +4,7 @@
  */
 
  #[derive(PartialEq, Clone, Copy)]
-enum RPS {
+enum Rps {
     Rock, Paper, Scissors
 }
 
@@ -13,8 +13,8 @@ enum PlayResult {
     Lose, Draw, Win
 }
 
-fn parse_rps(b: u8) -> RPS {
-    use RPS::*;
+fn parse_rps(b: u8) -> Rps {
+    use Rps::*;
     match b {
         b'A' | b'X' => Rock,
         b'B' | b'Y' => Paper,
@@ -37,8 +37,8 @@ macro_rules! beat {
     ($e:expr, $w:expr) => { if $e == $w { Win } else { Lose } };
 }
 
-fn play_rps(you: RPS, enemy: RPS) -> PlayResult {
-    use RPS::*;
+fn play_rps(you: Rps, enemy: Rps) -> PlayResult {
+    use Rps::*;
     use PlayResult::*;
     if you == enemy {
         Draw
@@ -51,8 +51,8 @@ fn play_rps(you: RPS, enemy: RPS) -> PlayResult {
     }
 }
 
-fn guess_rps(enemy: RPS, pr: PlayResult) -> RPS {
-    use RPS::*;
+fn guess_rps(enemy: Rps, pr: PlayResult) -> Rps {
+    use Rps::*;
     use PlayResult::*;
     match pr {
         Lose => match enemy {
@@ -69,8 +69,8 @@ fn guess_rps(enemy: RPS, pr: PlayResult) -> RPS {
     }
 }
 
-fn pts(you: RPS, pr: PlayResult) -> u32 {
-    use RPS::*;
+fn pts(you: Rps, pr: PlayResult) -> u32 {
+    use Rps::*;
     use PlayResult::*;
     let a = match you {
         Rock => 1,

@@ -64,7 +64,7 @@ pub fn part_1(input: &str) -> Option<String> {
             }
         }
     }
-    let s: String = v.iter().map(|x| x.last().unwrap().clone() as char).collect();
+    let s: String = v.iter().map(|x| *x.last().unwrap() as char).collect();
     Some(s)
 }
 
@@ -91,7 +91,7 @@ pub fn part_2(input: &str) -> Option<String> {
             v[t].extend_from_slice(vv.as_slice());
         }
     }
-    let s: String = v.iter().map(|x| x.last().unwrap().clone() as char).collect();
+    let s: String = v.iter().map(|x| *x.last().unwrap() as char).collect();
     Some(s)
 }
 

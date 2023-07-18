@@ -75,7 +75,7 @@ fn parse_tree(input: &str) -> FS {
                     x => { panic!("Unknown command: {}", x); }
                 }
             },
-            x if (b'0'..=b'9').contains(&x) => {
+            x if x.is_ascii_digit() => {
                 let n = sp.next().and_then(|d| d.parse::<u32>().ok()).expect("Unknown size");
                 let d = sp.next().unwrap();
                 fs.add(cd, d.clone(), false, n);

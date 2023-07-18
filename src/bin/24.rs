@@ -28,7 +28,7 @@ fn parse(input: &str) -> Vec<Vec<u8>> {
     grid
 }
 
-fn clear_at(grid: &Vec<Vec<u8>>, p: (usize, usize), s: (usize, usize), t: (usize, usize)) -> bool {
+fn clear_at(grid: &[Vec<u8>], p: (usize, usize), s: (usize, usize), t: (usize, usize)) -> bool {
     let (x, y) = p;
     let (xl, yl) = s;
     let (xt, yt) = t;
@@ -54,13 +54,11 @@ fn travel(grid: &Vec<Vec<u8>>, from: (usize, usize), to: (usize, usize), time: u
         for p in &pos_hs {
             for m in MOVES {
                 let dp = (p.0.wrapping_add_signed(m.0), p.1.wrapping_add_signed(m.1));
-                if dp.0 < size.0 && dp.1 < size.1 {
-                    if clear_at(&grid, dp, size, tt) {
-                        if dp == to {
-                            break 'l1;
-                        }
-                        upos.push(dp);
+                if dp.0 < size.0 && dp.1 < size.1 && clear_at(grid, dp, size, tt) {
+                    if dp == to {
+                        break 'l1;
                     }
+                    upos.push(dp);
                 }
             }
         }

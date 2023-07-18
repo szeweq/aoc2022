@@ -119,7 +119,7 @@ fn adv(pos: &mut [Pt]) {
 }
 
 pub fn part_2(input: &str) -> Option<u32> {
-    let mut pp: &mut [Pt; 10] = &mut [pt![]; 10];
+    let pp: &mut [Pt; 10] = &mut [pt![]; 10];
     let mut paths: HashSet<Pt> = HashSet::new();
     for l in input.lines() {
         let (side, st) = parse_step(l);
@@ -130,7 +130,7 @@ pub fn part_2(input: &str) -> Option<u32> {
                 Side::Y => pp[0].y += one
             }
             adv(pp);
-            paths.insert(pp[9].clone());
+            paths.insert(pp[9]);
         }
     }
     Some(paths.len() as u32)

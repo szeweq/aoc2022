@@ -2,7 +2,7 @@
  * Day 22: Monkey Map
  * See [https://adventofcode.com/2022/day/22]
  */
-use std::{collections::{HashMap, BTreeSet}};
+use std::collections::{HashMap, BTreeSet};
 
 const SEC_SIZE: isize = if cfg!(test) { 4 } else { 50 };
 
@@ -108,7 +108,7 @@ impl From<usize> for Dir {
 
 pub fn part_1(input: &str) -> Option<isize> {
     let (hm, movs) = parse(input);
-    let mut pos = hm.keys().min().unwrap().clone();
+    let mut pos = *hm.keys().min().unwrap();
     let mut cf = 0;
     let mut face = RP[cf];
     for i in 0..movs.len() {
@@ -198,7 +198,7 @@ pub fn part_2(input: &str) -> Option<isize> {
     let (si_to_sp, sp_to_si) = compute_sectors(&hm);
     let folds = compute_folds(&sp_to_si);
     
-    let mut pos = hm.keys().min().unwrap().clone();
+    let mut pos = *hm.keys().min().unwrap();
     let mut cf = Dir::R;
     let mut face = RP[cf as usize];
     for i in 0..movs.len() {

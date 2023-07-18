@@ -56,7 +56,7 @@ pub fn part_1(input: &str) -> Option<u32> {
     let ly = m.len();
     let spos: (u32, usize) = (500, 0);
     let mut i = 0u32;
-    let mut route = vec![spos.clone()];
+    let mut route = vec![spos];
     while let Some(&cpos) = route.last() {
         if cpos.1 >= ly {
             break;

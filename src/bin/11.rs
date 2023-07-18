@@ -75,7 +75,7 @@ fn op_item(item: u64, op: &MonkeyOp, lcd: u64) -> u64 {
     if lcd == 0 { m / 3 } else { m % lcd }
 }
 
-fn monkey_calc(vv: &mut Vec<Vec<u64>>, vm: &Vec<Monkey>, vi: &mut Vec<usize>, lcd: u64) {
+fn monkey_calc(vv: &mut [Vec<u64>], vm: &Vec<Monkey>, vi: &mut [usize], lcd: u64) {
     let vsz = vm.len();
     for i in 0..vsz {
         let m = &vm[i];
@@ -90,7 +90,7 @@ fn monkey_calc(vv: &mut Vec<Vec<u64>>, vm: &Vec<Monkey>, vi: &mut Vec<usize>, lc
     }
 }
 
-fn monkey_val(v: &mut Vec<usize>) -> Option<usize> {
+fn monkey_val(v: &mut [usize]) -> Option<usize> {
     v.sort();
     Some(v.iter().rev().take(2).product())
 }
