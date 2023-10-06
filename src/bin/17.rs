@@ -7,63 +7,63 @@ use std::collections::HashMap;
 
 const B_W: [u8; 5] = [4, 3, 3, 1, 2];
 
-const BCH: [for<'r> fn(&'r Vec<u8>, u8, usize) -> bool; 5] = [b0_check, b1_check, b2_check, b3_check, b4_check];
-const BFL: [for<'r> fn(&'r mut Vec<u8>, (u8, usize)); 5] = [b0_fill, b1_fill, b2_fill, b3_fill, b4_fill];
+const BCH: [for<'r> fn(&'r [u8], u8, usize) -> bool; 5] = [b0_check, b1_check, b2_check, b3_check, b4_check];
+const BFL: [for<'r> fn(&'r mut [u8], (u8, usize)); 5] = [b0_fill, b1_fill, b2_fill, b3_fill, b4_fill];
 
-fn b0_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+fn b0_check(v: &[u8], x: u8, y: usize) -> bool {
     let c = 15u8 << x;
     v[y] & c == 0
 }
-fn b1_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+fn b1_check(v: &[u8], x: u8, y: usize) -> bool {
     let c1 = 2 << x;
     let c2 = 7 << x;
     v[y] & c1 == 0 && v[y + 1] & c2 == 0 && v[y + 2] & c1 == 0
 }
-fn b2_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+fn b2_check(v: &[u8], x: u8, y: usize) -> bool {
     let c1 = 7 << x;
     let c2 = 1 << x;
     v[y] & c1 == 0 && v[y + 1] & c2 == 0 && v[y + 2] & c2 == 0
 }
-fn b3_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+fn b3_check(v: &[u8], x: u8, y: usize) -> bool {
     let c = 1 << x;
     v[y] & c == 0 && v[y + 1] & c == 0 && v[y + 2] & c == 0 && v[y + 3] & c == 0
 }
-fn b4_check(v: &Vec<u8>, x: u8, y: usize) -> bool {
+fn b4_check(v: &[u8], x: u8, y: usize) -> bool {
     let c = 3 << x;
     v[y] & c == 0 && v[y + 1] & c == 0
 }
 
-fn b0_fill(v: &mut Vec<u8>, p: (u8, usize)) {
+fn b0_fill(v: &mut [u8], p: (u8, usize)) {
     v[p.1] |= 15 << p.0;
 }
-fn b1_fill(v: &mut Vec<u8>, p: (u8, usize)) {
+fn b1_fill(v: &mut [u8], p: (u8, usize)) {
     let c1 = 2 << p.0;
     let c2 = 7 << p.0;
     v[p.1] |= c1;
     v[p.1 + 1] |= c2;
     v[p.1 + 2] |= c1;
 }
-fn b2_fill(v: &mut Vec<u8>, p: (u8, usize)) {
+fn b2_fill(v: &mut [u8], p: (u8, usize)) {
     let c1 = 7 << p.0;
     let c2 = 1 << p.0;
     v[p.1] |= c1;
     v[p.1 + 1] |= c2;
     v[p.1 + 2] |= c2;
 }
-fn b3_fill(v: &mut Vec<u8>, p: (u8, usize)) {
+fn b3_fill(v: &mut [u8], p: (u8, usize)) {
     let c = 1 << p.0;
     v[p.1] |= c;
     v[p.1 + 1] |= c;
     v[p.1 + 2] |= c;
     v[p.1 + 3] |= c;
 }
-fn b4_fill(v: &mut Vec<u8>, p: (u8, usize)) {
+fn b4_fill(v: &mut [u8], p: (u8, usize)) {
     let c = 3 << p.0;
     v[p.1] |= c;
     v[p.1 + 1] |= c;
 }
 
-fn row_cut(v: &Vec<u8>) -> Option<usize> {
+fn row_cut(v: &[u8]) -> Option<usize> {
     let mut max = 0;
     for (yy, xx) in v.iter().enumerate().rev() {
         max |= *xx;
@@ -74,7 +74,7 @@ fn row_cut(v: &Vec<u8>) -> Option<usize> {
     None
 }
 
-fn view_blocks(v: &Vec<u8>, bl: u8, i: usize) -> ([u8; 7], u8, usize) {
+fn view_blocks(v: &[u8], bl: u8, i: usize) -> ([u8; 7], u8, usize) {
     let mut hx = [0; 7];
     for (yy, xx) in v.iter().enumerate().rev() {
         let ux = *xx;
@@ -94,7 +94,7 @@ fn view_blocks(v: &Vec<u8>, bl: u8, i: usize) -> ([u8; 7], u8, usize) {
     (hx, bl, i)
 }
 
-fn find_top(v: &Vec<u8>) -> usize {
+fn find_top(v: &[u8]) -> usize {
     v.iter().position(|&x| x == 0).unwrap()
 }
 

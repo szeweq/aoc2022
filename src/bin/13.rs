@@ -26,21 +26,21 @@ fn parse_packet(input: &str) -> IResult<&str, Packet> {
     ))(input)
 }
 
-fn cmp_packets(left: &Packet, right: &Packet, depth: usize) -> Ordering {
+fn cmp_packets(left: &Packet, right: &Packet, _depth: usize) -> Ordering {
     use Packet::*;
     match (left, right) {
         (N(l), N(r)) => {
             l.cmp(r)
         },
         (L(_), N(_)) => {
-            cmp_packets(left, &Packet::L(vec![right.clone()]), depth + 1)
+            cmp_packets(left, &Packet::L(vec![right.clone()]), _depth + 1)
         }
         (N(_), L(_)) => {
-            cmp_packets(&Packet::L(vec![left.clone()]), right, depth + 1)
+            cmp_packets(&Packet::L(vec![left.clone()]), right, _depth + 1)
         }
         (L(l), L(r)) => {
             for (i1, i2) in l.iter().zip(r) {
-                let result = cmp_packets(i1, i2, depth + 1);
+                let result = cmp_packets(i1, i2, _depth + 1);
                 if result != Ordering::Equal {
                     return result;
                 }
