@@ -26,8 +26,7 @@ fn update_elf_pos(hm: &mut HashSet<Pt>, dir: usize) -> usize {
     for j in 0..keys.len() {
         let elf = keys[j];
         let mut adj = 0;
-        for a in 0..8 {
-            let f = LOOKUP[a];
+        for (a, f) in LOOKUP.iter().enumerate() {
             if !hm.contains(&(elf.0 + f.0, elf.1 + f.1)) {
                 adj |= 1 << a;
             }

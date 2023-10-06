@@ -14,8 +14,8 @@ impl Display for MatrixDisplay {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in 0..6 {
             let line = &self.data[i*40..(i+1)*40];
-            for j in 0..40 {
-                f.write_char(if line[j] { '█' } else { '░' })?;
+            for j in line {
+                f.write_char(if *j { '█' } else { '░' })?;
             }
             writeln!(f)?;
         }

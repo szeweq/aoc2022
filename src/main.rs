@@ -13,7 +13,7 @@ fn main() {
             exit(1);
         }
         Err(e) => {
-            eprintln!("FATAL error: {}", e);
+            eprintln!("FATAL error: {e}");
             exit(1);
         }
     }
@@ -37,7 +37,7 @@ fn is_file_empty(path: &Path) -> Result<bool, io::Error> {
 }
 
 fn file_empty_error(path: &str) -> io::Error {
-    io::Error::new(io::ErrorKind::Other, format!("File \"{}\" is empty", path))
+    io::Error::new(io::ErrorKind::Other, format!("File \"{path}\" is empty"))
 }
 
 fn check_input_file(path: &str) -> Result<bool, io::Error> {
@@ -54,10 +54,10 @@ fn check_input_file(path: &str) -> Result<bool, io::Error> {
 }
 
 fn check_day(day: u8) -> Result<bool, io::Error> {
-    let fday = format!("{:02}", day);
-    let path_input = format!("inputs/{}.txt", fday);
-    let path_example = format!("examples/{}.txt", fday);
-    let path_bin = format!("src/bin/{}.rs", fday);
+    let fday = format!("{day:02}");
+    let path_input = format!("inputs/{fday}.txt");
+    let path_example = format!("examples/{fday}.txt");
+    let path_bin = format!("src/bin/{fday}.rs");
 
     if !Path::new(&path_bin).exists() {
         let tf = fs::read_to_string("src/template.rs")?;

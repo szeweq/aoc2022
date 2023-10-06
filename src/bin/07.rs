@@ -78,12 +78,12 @@ fn parse_tree(input: &str) -> FS {
             x if x.is_ascii_digit() => {
                 let n = sp.next().and_then(|d| d.parse::<u32>().ok()).expect("Unknown size");
                 let d = sp.next().unwrap();
-                fs.add(cd, d.clone(), false, n);
+                fs.add(cd, d, false, n);
             },
             b'd' => {
                 sp.next();
                 let d = sp.next().unwrap();
-                fs.add(cd, d.clone(), true, 0);
+                fs.add(cd, d, true, 0);
             }
             _ => {
                 panic!("Invalid line: {}", l);
